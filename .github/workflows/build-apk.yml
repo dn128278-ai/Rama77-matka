@@ -26,23 +26,34 @@ jobs:
             echo "Found ZIP file: $ZIP_FILE. Extracting..."
             unzip -o "$ZIP_FILE" -d temp_extract
             
-            # Subfolder dhoond kar sabhi files ko root par copy karo
+            # Subfolder ya nested folder mein gradlew dhoondo
             GRADLEW_PATH=$(find temp_extract -name "gradlew" | head -n 1)
             if [ -n "$GRADLEW_PATH" ]; then
               SRC_DIR=$(dirname "$GRADLEW_PATH")
               echo "Found source directory at: $SRC_DIR"
+              # Hidden files sahit sabhi files root par move/copy karo
+              shopt -s dotglob
               cp -rn "$SRC_DIR"/* .
             else
+              shopt -s dotglob
               cp -rn temp_extract/* .
             fi
             rm -rf temp_extract
           fi
-
-      - name: Make Gradle Executable
-        run: chmod +x gradlew
+          echo "Listing current files:"
+          ls -la
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug --stacktrace
+          else
+            echo "Gradle wrapper missing, initializing..."
+            gradle wrapper
+            chmod +x gradlew
+            ./gradlew assembleDebug --stacktrace
+          fi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4

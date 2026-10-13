@@ -19,9 +19,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Extract Uploaded ZIP File
         run: |
           ZIP_FILE=$(ls *.zip 2>/dev/null | head -n 1)

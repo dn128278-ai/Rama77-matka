@@ -26,19 +26,20 @@ jobs:
             echo "Found ZIP file: $ZIP_FILE. Extracting..."
             unzip -o "$ZIP_FILE" -d temp_extract
             
-            if [ -f "temp_extract/build.gradle.kts" ] || [ -f "temp_extract/build.gradle" ]; then
-              cp -rn temp_extract/* .
+            # Subfolder dhoond kar sabhi files ko root par copy karo
+            GRADLEW_PATH=$(find temp_extract -name "gradlew" | head -n 1)
+            if [ -n "$GRADLEW_PATH" ]; then
+              SRC_DIR=$(dirname "$GRADLEW_PATH")
+              echo "Found source directory at: $SRC_DIR"
+              cp -rn "$SRC_DIR"/* .
             else
-              SUB_DIR=$(find temp_extract -mindepth 1 -maxdepth 1 -type d | head -n 1)
-              if [ -n "$SUB_DIR" ]; then
-                cp -rn $SUB_DIR/* .
-              fi
+              cp -rn temp_extract/* .
             fi
             rm -rf temp_extract
           fi
 
       - name: Make Gradle Executable
-        run: chmod +x gradlew || true
+        run: chmod +x gradlew
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
